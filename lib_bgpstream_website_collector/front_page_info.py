@@ -5,7 +5,7 @@ import bs4
 from .row import Row
 
 
-@dataclass(frozen=True)
+@dataclass(init=False)
 class FrontPageInfo:
     event_name: str
     start: str
@@ -15,7 +15,7 @@ class FrontPageInfo:
     end: str
     RowCls: Row
 
-    def __post_init__(self, row: bs4.element.Tag, url: str):
+    def __init__(self, row: bs4.element.Tag):
         """Returns type of event, start, end, url, event num.
 
         Essentially, all info available on front page of bgpstream.com.
@@ -27,7 +27,7 @@ class FrontPageInfo:
         self.start = [x for x in row.children][7].string.strip() + '+00:00'
         self.end: str = [x for x in row.children][9].string.strip() + '+00:00'
         self.url: str = [x for x in row.children][11].a["href"]
-        self.event_num: int = int(url.split("/")[-1])
+        self.event_num: int = int(self.url.split("/")[-1])
         if self.end == "+00:00":
             self.end = 'None'
 

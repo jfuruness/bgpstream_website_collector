@@ -3,7 +3,7 @@ import re
 
 import bs4
 
-from ...utils import utils
+from lib_utils import helper_funcs
 
 
 class Row:
@@ -59,10 +59,20 @@ class Row:
                "outage_number_prefixes_affected",
                "outage_percent_prefixes_affected",)
 
+    name_to_type = dict()
+
+    def __init_subclass__(cls, *args, **kwargs):
+        """This method essentially creates a list of all subclasses
+        This is allows us to easily assign yaml tags
+        """
+
+        super().__init_subclass__(*args, **kwargs)
+        cls.name_to_type[cls.name] = cls
+
     def __init__(self, row: bs4.element.Tag):
         self.el = row
 
-    def parse(self) -> tuple:
+    def parse(self) -> dict:
         """Parses, formats, and appends a row of data from bgpstream.com.
 
         For a more in depth explanation see the top of the file."""
@@ -80,11 +90,11 @@ class Row:
 
         return self.tsv_formatted_data()
 
-    def tsv_formatted_data(self) -> tuple:
-        for k, v in self._data:
+    def tsv_formatted_data(self) -> dict:
+        for k, v in self._data.items():
             assert k in self.columns, k
 
-        return tuple([self._data.get(col) for col in self.columns])
+        return {col: self._data.get(col) for col in self.columns}
 
 ####################
 # Helper Functions #
@@ -120,7 +130,7 @@ class Row:
             self._data["url"]).group()
         url = 'https://bgpstream.com' + self._data["url"]
         # Returns the as info and html for the page with more info
-        return as_info, utils.get_tags(url, "td")
+        return as_info, helper_funcs.get_tags(url, "td")
 
     def _parse_as_info(self, as_info: str):
         """Performs regex on as_info to return AS number and AS name.

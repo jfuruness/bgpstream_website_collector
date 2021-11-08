@@ -11,7 +11,7 @@ class LeakRow(Row):
     def _parse_uncommon_info(self, as_info: str, extended_children: list):
         """Parses misc leak row info."""
 
-        self._data["origin_as_name"], self._data["origin_as_number"] =\
+        self._data["leak_origin_as_name"], self._data["leak_origin_as_number"] =\
             self._parse_as_info(as_info[1])
         self._data["leaker_as_name"], self._data["leaker_as_number"] =\
             self._parse_as_info(as_info[3])
@@ -42,8 +42,8 @@ class LeakRow(Row):
         example_as_path = self._nums_regex.search(
             extended_children[end - 2].string.strip()).group(1)
         example_as_path = str([int(s) for s in example_as_path.split(' ')])
-        self._data["example_as_path"] =\
+        self._data["leak_example_as_path"] =\
             example_as_path.replace('[', '{').replace(']', '}')
-        self._data["detected_by_bgpmon_peers"] = self._nums_regex.search(
+        self._data["leak_detected_by_bgpmon_peers"] = self._nums_regex.search(
             extended_children[end - 1].string.strip()).group(1)
         logging.debug("Parsed leak")

@@ -30,8 +30,7 @@ class BGPStreamWebsiteCollector(base_classes.Base):
     def _get_rows(self) -> List[Row]:
         """Returns rows within row limit"""
 
-        if self.debug:
-            row_limit = 30
+        row_limit = 30 if self.debug else None
 
         # Gets the rows to parse
         rows: List[bs4.element.Tag] = helper_funcs.get_tags(self.url, "tr")
@@ -42,7 +41,12 @@ class BGPStreamWebsiteCollector(base_classes.Base):
 
         row_instances = []
         for row in rows[:row_limit]:
-            row_front_page_info = FrontPageInfo(row)
-            row_instances.append(row_front_page_info.RowCls(row, self.url))
+            try:
+                row_front_page_info = FrontPageInfo(row)
+            # We don't support Unclassified events
+            # This appears to be a bug in their website
+            except KeyError:
+                continue
+            row_instances.append(row_front_page_info.RowCls(row))
 
         return row_instances
