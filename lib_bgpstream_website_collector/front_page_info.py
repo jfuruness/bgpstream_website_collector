@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 import bs4
 
@@ -12,6 +12,7 @@ class FrontPageInfo:
     start: str
     start_date: date
     end: str
+    end_date: date
     url: str
     event_num: int
     end: str
@@ -33,5 +34,8 @@ class FrontPageInfo:
         self.event_num: int = int(self.url.split("/")[-1])
         if self.end == "+00:00":
             self.end = 'None'
+            self.end_date = (datetime.now() + timedelta(days=1)).date()
+        else:
+            self.end_date = datetime.strptime(self.end.split(" ")[0], "%Y-%m-%d").date()
 
         self.RowCls = Row.name_to_type[self.event_name]

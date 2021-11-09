@@ -37,12 +37,12 @@ class BGPStreamWebsiteCollector(base_classes.Base):
         # Remove last ten rows - html is messed up
         for row in rows[:len(rows) - 10]:
             try:
-                row_front_page_info = FrontPageInfo(row)
+                info = FrontPageInfo(row)
             # We don't support Unclassified events
             # This appears to be a bug in their website
             except KeyError:
                 continue
-            if self.dl_time.date() == row_front_page_info.start_date:
-                row_instances.append(row_front_page_info.RowCls(row))
+            if info.start_date <= self.dl_time.date() <= info.end_date:
+                row_instances.append(info.RowCls(row))
 
         return row_instances
