@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, date
 
 import bs4
 
@@ -9,6 +10,7 @@ from .row import Row
 class FrontPageInfo:
     event_name: str
     start: str
+    start_date: date
     end: str
     url: str
     event_num: int
@@ -25,6 +27,7 @@ class FrontPageInfo:
         self.event_name: str = [x for x in row.children][1].string.strip()
 
         self.start = [x for x in row.children][7].string.strip() + '+00:00'
+        self.start_date = datetime.strptime(self.start.split(" ")[0], "%Y-%m-%d").date()
         self.end: str = [x for x in row.children][9].string.strip() + '+00:00'
         self.url: str = [x for x in row.children][11].a["href"]
         self.event_num: int = int(self.url.split("/")[-1])
