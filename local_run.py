@@ -5,10 +5,10 @@ from lib_mrt_collector import MRTCollector, Source, BGPGrep
 
 def run(dl_time, sources=Source.sources.copy(), tool=BGPGrep, max_block_size=2000):
 
-    t_str = f"{dl_time.year}_{dl_time.month}_{dl_time.day}"
+    t_str = f"{dl_time.year}_0{dl_time.month}_{dl_time.day}"
     path = Path(f"/data/mrt_cache/{t_str}")
-    local_file_path = path / t_str + ".mrt"
-    assert local_file_path.exists()
+    local_file_path = Path(f"/data/mrt_cache/local_files/{t_str}.mrt")
+    assert local_file_path.exists(), local_file_path
     collector = MRTCollector(dir_=path, dir_exist_ok=True, dl_time=dl_time)
     collector._download_collectors()  ##
     mrt_files = collector._init_mrt_files(sources=[], local_files=[str(local_file_path)])
@@ -26,7 +26,14 @@ def run(dl_time, sources=Source.sources.copy(), tool=BGPGrep, max_block_size=200
 if __name__ == "__main__":
     # Timing test
     # #######################################################input("Ensure com is on performance mode")
-    start = datetime.now()
-    dl_time = datetime(year=2021, month=4, day=29, hour=0, minute=0, second=0)
-    run()
-    print((datetime.now() - start).total_seconds())
+
+    kwargs = {"year": 2021, "hour": 0, "minute": 0, "second": 0}
+    dl_times = [datetime(month=1, day=22, **kwargs),
+                datetime(month=3, day=19, **kwargs),
+                datetime(month=4, day=29, **kwargs),
+                datetime(month=6, day=2, **kwargs),
+                datetime(month=8, day=21, **kwargs)]
+    for dl_time in dl_times:
+        start = datetime.now()
+        run(dl_time)
+        print((datetime.now() - start).total_seconds())
