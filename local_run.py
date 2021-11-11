@@ -5,7 +5,7 @@ from lib_mrt_collector import MRTCollector, Source, BGPGrep
 
 def run(dl_time, sources=Source.sources.copy(), tool=BGPGrep, max_block_size=2000):
 
-    t_str = f"{dl_time.year}_0{dl_time.month}_{dl_time.day}"
+    t_str = dl_time.strftime("%Y_%m_%d")
     path = Path(f"/data/mrt_cache/{t_str}")
     local_file_path = Path(f"/data/mrt_cache/local_files/{t_str}.mrt")
     assert local_file_path.exists(), local_file_path
