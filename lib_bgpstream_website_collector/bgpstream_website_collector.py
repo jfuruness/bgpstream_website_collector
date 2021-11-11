@@ -24,8 +24,9 @@ class BGPStreamWebsiteCollector(base_classes.Base):
         for row in tqdm(rows, desc="Parsing BGPStream.com", total=len(rows)):
             # Parses the row into tsv format. Can't do with mp, rate limited
             tsv_rows.append(row.parse())
-        file_funcs.write_dicts_to_tsv(tsv_rows, self.tsv_path)
-        logging.debug("Wrote TSV")
+        if len(tsv_row) > 0:
+            file_funcs.write_dicts_to_tsv(tsv_rows, self.tsv_path)
+            logging.debug("Wrote TSV")
 
     def _get_rows(self) -> List[Row]:
         """Returns rows within row limit"""
