@@ -43,6 +43,8 @@ class Row:
                "hijack_expected_origin_number",
                "hijack_expected_prefix",
                "hijack_more_specific_prefix",
+               "hijack_expected_roa_validity",
+               "hijack_detected_roa_validity",
                # Leak fields
                "leak_detected_by_bgpmon_peers",
                "leak_example_as_path",
@@ -53,6 +55,7 @@ class Row:
                "leaker_as_number",
                "leak_origin_as_name",
                "leak_origin_as_number",
+               "leak_roa_validity",
                # Outage fields
                "outage_as_name",
                "outage_as_number",
@@ -72,7 +75,7 @@ class Row:
     def __init__(self, row: bs4.element.Tag):
         self.el = row
 
-    def parse(self) -> dict:
+    def parse(self, roa_checker) -> dict:
         """Parses, formats, and appends a row of data from bgpstream.com.
 
         For a more in depth explanation see the top of the file."""
@@ -84,7 +87,7 @@ class Row:
         try:
             as_info, extended_children = self._parse_common_elements()
             # Parses uncommon elements and stores them in temp_row
-            self._parse_uncommon_info(as_info, extended_children)
+            self._parse_uncommon_info(as_info, extended_children, roa_checker)
         except AttributeError:
             logging.warning('ERROR IN THIS ROW. WILL NOT BE APPENDED')
 
@@ -138,8 +141,10 @@ class Row:
         This is a mess, but that's because parsing html is a mess.
         """
 
+        as_parsed = self._as_regex.search(as_info)
+
         # If the as_info is "N/A" and the regex returns nothing
-        if (as_parsed := self._as_regex.search(as_info)) is None:
+        if as_parsed is None:
             # Sometimes we can get this
             try:
                 return None, re.findall(r'\d+', as_info)[0]

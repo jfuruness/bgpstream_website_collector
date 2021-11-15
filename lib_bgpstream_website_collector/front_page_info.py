@@ -34,7 +34,7 @@ class FrontPageInfo:
         self.event_num: int = int(self.url.split("/")[-1])
         if self.end == "+00:00":
             self.end = 'None'
-            self.end_date = (datetime.now() + timedelta(days=1)).date()
+            self.end_date = self.start_date + timedelta(days=1)
         else:
             self.end_date = datetime.strptime(self.end.split(" ")[0], "%Y-%m-%d").date()
 

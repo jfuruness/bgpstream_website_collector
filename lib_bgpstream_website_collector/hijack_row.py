@@ -1,5 +1,7 @@
 import logging
 
+from ipaddress import ip_network
+
 from .row import Row
 
 
@@ -8,7 +10,10 @@ class HijackRow(Row):
 
     name = "Possible Hijack"
 
-    def _parse_uncommon_info(self, as_info: str, extended_children: list):
+    def _parse_uncommon_info(self,
+                             as_info: str,
+                             extended_children: list,
+                             roa_checker):
         """Parses misc hijack row info."""
 
         self._data["hijack_expected_origin_name"],\
@@ -38,4 +43,13 @@ class HijackRow(Row):
 
         self._data["hijack_detected_by_bgpmon_peers"] = self._nums_regex.search(
             extended_children[end - 1].string.strip()).group(1)
+
+        # Add ROA metadata
+        self._data["hijack_expected_roa_validity"] = roa_checker.get_validity(
+            ip_network(self._data["hijack_expected_prefix"]),
+            int(self._data["hijack_expected_origin_number"]))
+        self._data["hijack_detected_roa_validity"] = roa_checker.get_validity(
+            ip_network(self._data["hijack_more_specific_prefix"]),
+            int(self._data["hijack_detected_origin_number"]))
+
         logging.debug("Parsed Hijack Row")

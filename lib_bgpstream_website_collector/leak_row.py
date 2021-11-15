@@ -1,5 +1,7 @@
 import logging
 
+from ipaddress import ip_network
+
 from .row import Row
 
 
@@ -8,7 +10,7 @@ class LeakRow(Row):
 
     name = "BGP Leak"
 
-    def _parse_uncommon_info(self, as_info: str, extended_children: list):
+    def _parse_uncommon_info(self, as_info: str, extended_children: list, roa_checker):
         """Parses misc leak row info."""
 
         self._data["leak_origin_as_name"], self._data["leak_origin_as_number"] =\
@@ -46,4 +48,7 @@ class LeakRow(Row):
             example_as_path.replace('[', '{').replace(']', '}')
         self._data["leak_detected_by_bgpmon_peers"] = self._nums_regex.search(
             extended_children[end - 1].string.strip()).group(1)
+
+        self._data["leak_roa_validity"] = roa_checker.get_validity(
+            ip_network(self._data["leaked_prefix"]), int(self._data["leak_origin_as_number"]))
         logging.debug("Parsed leak")

@@ -8,7 +8,7 @@ class OutageRow(Row):
 
     name = "Outage"
 
-    def _parse_uncommon_info(self, as_info: str, extended_children: list):
+    def _parse_uncommon_info(self, as_info: str, extended_children: list, *args):
         """Parses misc outage row info."""
 
         self._data["outage_as_name"], self._data["outage_as_number"] =\
