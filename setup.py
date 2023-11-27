@@ -18,11 +18,8 @@ setup(
     keywords=["Furuness", "BGP", "Hijack", "Outage", "Leak", "BGPStream"
               "Peers", "Customers", "Providers", "BGPStream.com"],
     include_package_data=True,
-    python_requires=">=3.7",
+    python_requires=">=3.10",
     packages=find_packages(),
-    install_requires=[
-        'lib_utils @ git+ssh://git@github.com/jfuruness/lib_utils.git',
-    ],
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: Developers',
@@ -31,6 +28,4 @@ setup(
         'Programming Language :: Python :: 3'],
     entry_points={
         'console_scripts': 'lib_bgpstream_website_collector = lib_bgpstream_website_collector.__main__:main'},
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
 )
