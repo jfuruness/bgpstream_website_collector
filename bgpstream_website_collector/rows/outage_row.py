@@ -9,13 +9,14 @@ class OutageRow(Row):
     def _parse_uncommon_info(self, as_info: str, extended_children: list):
         """Parses misc outage row info."""
 
-        self._data["outage_as_name"], self._data["outage_as_number"] =\
-            self._parse_as_info(as_info)
+        (
+            self._data["outage_as_name"],
+            self._data["outage_as_number"],
+        ) = self._parse_as_info(as_info)
         # We must work from the end of the elements, because the number
         # of elements at the beginning may vary depending on whether or not
         # end time is specified
-        prefix_string = extended_children[
-            len(extended_children) - 1].string.strip()
+        prefix_string = extended_children[len(extended_children) - 1].string.strip()
         # Finds all the numbers within a string
         prefix_info = self._nums_regex.findall(prefix_string)
         self._data["outage_number_prefixes_affected"] = prefix_info[0].strip()

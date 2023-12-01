@@ -10,17 +10,19 @@ class Row:
     """Parent Class for parsing rows of bgpstream.com"""
 
     # This regex parses out the AS number and name from a string of both
-    _as_regex = re.compile(r'''
+    _as_regex = re.compile(
+        r"""
                            (?P<as_name>.+?)\s\(
                            AS\s(?P<as_number>\d+)\)
                            |
                            (?P<as_number2>\d+).*?\((?P<as_name2>.+?)\)
-                           ''', re.VERBOSE
-                           )
+                           """,
+        re.VERBOSE,
+    )
     # This regex returns a string that starts and ends with numbers
-    _nums_regex = re.compile(r'(\d[^a-zA-Z\(\)\%]*\d*)')
+    _nums_regex = re.compile(r"(\d[^a-zA-Z\(\)\%]*\d*)")
     # This regex is used in some places to get prefixes
-    _ip_regex = re.compile(r'.+?:(.+)')
+    _ip_regex = re.compile(r".+?:(.+)")
 
     # I know that these are distinct things
     # Maybe you think they should only be in separate files
@@ -28,36 +30,38 @@ class Row:
 
     # Common fields first
     # DO NOT ALTER THE ORDERING!!!
-    columns = ("country",
-               "start_time",
-               "end_time",
-               "event_number",
-               "event_type",
-               "url",
-               # Hijack fields
-               "hijack_detected_as_path",
-               "hijack_detected_by_bgpmon_peers",
-               "hijack_detected_origin_name",
-               "hijack_detected_origin_number",
-               "hijack_expected_origin_name",
-               "hijack_expected_origin_number",
-               "hijack_expected_prefix",
-               "hijack_more_specific_prefix",
-               # Leak fields
-               "leak_detected_by_bgpmon_peers",
-               "leak_example_as_path",
-               "leaked_prefix",
-               "leaked_to_name",
-               "leaked_to_number",
-               "leaker_as_name",
-               "leaker_as_number",
-               "leak_origin_as_name",
-               "leak_origin_as_number",
-               # Outage fields
-               "outage_as_name",
-               "outage_as_number",
-               "outage_number_prefixes_affected",
-               "outage_percent_prefixes_affected",)
+    columns = (
+        "country",
+        "start_time",
+        "end_time",
+        "event_number",
+        "event_type",
+        "url",
+        # Hijack fields
+        "hijack_detected_as_path",
+        "hijack_detected_by_bgpmon_peers",
+        "hijack_detected_origin_name",
+        "hijack_detected_origin_number",
+        "hijack_expected_origin_name",
+        "hijack_expected_origin_number",
+        "hijack_expected_prefix",
+        "hijack_more_specific_prefix",
+        # Leak fields
+        "leak_detected_by_bgpmon_peers",
+        "leak_example_as_path",
+        "leaked_prefix",
+        "leaked_to_name",
+        "leaked_to_number",
+        "leaker_as_name",
+        "leaker_as_number",
+        "leak_origin_as_name",
+        "leak_origin_as_number",
+        # Outage fields
+        "outage_as_name",
+        "outage_as_number",
+        "outage_number_prefixes_affected",
+        "outage_percent_prefixes_affected",
+    )
 
     name_to_type = dict()
 
@@ -86,7 +90,7 @@ class Row:
             # Parses uncommon elements and stores them in temp_row
             self._parse_uncommon_info(as_info, extended_children)
         except AttributeError:
-            print('ERROR IN THIS ROW. WILL NOT BE APPENDED')
+            print("ERROR IN THIS ROW. WILL NOT BE APPENDED")
 
         return self.tsv_formatted_data()
 
@@ -96,9 +100,9 @@ class Row:
 
         return {col: self._data.get(col) for col in self.columns}
 
-####################
-# Helper Functions #
-####################
+    ####################
+    # Helper Functions #
+    ####################
 
     def _parse_common_elements(self, session: CachedSession):
         """Parses common tags and adds data to temp_row.
@@ -126,9 +130,8 @@ class Row:
         self._data["start_time"] = children[7].string.strip()
         self._data["end_time"] = children[9].string.strip()
         self._data["url"] = children[11].a["href"]
-        self._data["event_number"] = self._nums_regex.search(
-            self._data["url"]).group()
-        url = 'https://bgpstream.com' + self._data["url"]
+        self._data["event_number"] = self._nums_regex.search(self._data["url"]).group()
+        url = "https://bgpstream.com" + self._data["url"]
 
         # Returns the as info and html for the page with more info
         return as_info, get_tags("td", url, session)
@@ -145,7 +148,7 @@ class Row:
         if as_parsed is None:
             # Sometimes we can get this
             try:
-                return None, re.findall(r'\d+', as_info)[0]
+                return None, re.findall(r"\d+", as_info)[0]
             # Sometimes not
             except IndexError:  # Should not use bare except
                 return None, None
@@ -155,5 +158,4 @@ class Row:
                 return as_parsed.group("as_name"), as_parsed.group("as_number")
             # This is the second way the string can be formatted:
             elif as_parsed.group("as_number2") not in [None, "", " "]:
-                return as_parsed.group("as_name2"),\
-                    as_parsed.group("as_number2")
+                return as_parsed.group("as_name2"), as_parsed.group("as_number2")

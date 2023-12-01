@@ -32,9 +32,9 @@ class BGPStreamWebsiteCollector:
         self.session = requests_cache.CachedSession(str(self.requests_cache_db_path))
 
         # https://stackoverflow.com/a/35636367
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
-        self.session.mount('http://', HTTPAdapter(max_retries=retries))
-        self.session.mount('https://', HTTPAdapter(max_retries=retries))
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
+        self.session.mount("http://", HTTPAdapter(max_retries=retries))
+        self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
     def __del__(self):
         self.session.close()
@@ -59,7 +59,7 @@ class BGPStreamWebsiteCollector:
 
         row_instances = []
         # Remove last ten rows - html is messed up
-        for row in rows[:len(rows) - 10]:
+        for row in rows[: len(rows) - 10]:
             try:
                 info = FrontPageInfo(row)
             # We don't support Unclassified events

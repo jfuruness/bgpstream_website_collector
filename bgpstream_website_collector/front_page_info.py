@@ -27,13 +27,13 @@ class FrontPageInfo:
         # Gets the type of event (in the events enum) for the row
         self.event_name: str = [x for x in row.children][1].string.strip()
 
-        self.start = [x for x in row.children][7].string.strip() + '+00:00'
+        self.start = [x for x in row.children][7].string.strip() + "+00:00"
         self.start_date = datetime.strptime(self.start.split(" ")[0], "%Y-%m-%d").date()
-        self.end: str = [x for x in row.children][9].string.strip() + '+00:00'
+        self.end: str = [x for x in row.children][9].string.strip() + "+00:00"
         self.url: str = [x for x in row.children][11].a["href"]
         self.event_num: int = int(self.url.split("/")[-1])
         if self.end == "+00:00":
-            self.end = 'None'
+            self.end = "None"
             self.end_date = self.start_date + timedelta(days=1)
         else:
             self.end_date = datetime.strptime(self.end.split(" ")[0], "%Y-%m-%d").date()
