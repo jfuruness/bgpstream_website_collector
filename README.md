@@ -22,6 +22,7 @@ As a caveat, I wrote this a very long time ago when I was still an undergrad.
 I've cleaned it up a bit, but this has a long way to go before it's good code quality
 PRs welcome.
 Also, almost everything is type ignored because mypy spazzes out with bs4
+Also, the tests could really use a good update
 
 ## Usage
 * [bgpstream\_website\_collector](#bgpstream\_website\_collector)
