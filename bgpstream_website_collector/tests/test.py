@@ -1,4 +1,6 @@
-from unittest.mock import path
+import csv
+from pathlib import Path
+from unittest.mock import patch
 
 from bgpstream_website_collector import BGPStreamWebsiteCollector
 from bgpstream_website_collector import LeakRow, HijackRow, OutageRow
@@ -15,7 +17,7 @@ class TestBGPStreamWebsiteCollector:
         request_cache_db_path = tmp_path / "requests_cache.db"
 
         def mock_get_rows(*args, **kwargs):
-            original_function = BGPStreamWebsiteParser._get_rows
+            original_function = BGPStreamWebsiteCollector._get_rows
             full_list = original_function(*args, **kwargs)
             shortened_list = list()
             for RowCls in (HijackRow, LeakRow, OutageRow):
@@ -25,8 +27,8 @@ class TestBGPStreamWebsiteCollector:
                         break
             return shortened_list
 
-        with patch('bgpstream_website_collector.BGPStreamWebsiteParser._get_rows', new=mock_get_rows):
-            parser = BGPStreamWebsiteParser(csv_path=csv_path, request_cache_db_path=request_cache_db_path)
+        with patch('bgpstream_website_collector.BGPStreamWebsiteCollector._get_rows', new=mock_get_rows):
+            parser = BGPStreamWebsiteCollector(csv_path=csv_path, request_cache_db_path=request_cache_db_path)
             rows = parser.run()
             assert len(rows) == 3
             with csv_path.open() as f:
