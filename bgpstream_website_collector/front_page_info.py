@@ -18,7 +18,7 @@ class FrontPageInfo:
     end: str
     RowCls: Row
 
-    def __init__(self, row: bs4.element.Tag):
+    def __init__(self, row: bs4.element.Tag) -> None:
         """Returns type of event, start, end, url, event num.
 
         Essentially, all info available on front page of bgpstream.com.

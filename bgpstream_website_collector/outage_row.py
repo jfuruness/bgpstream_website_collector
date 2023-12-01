@@ -1,5 +1,3 @@
-import logging
-
 from .row import Row
 
 
@@ -8,7 +6,7 @@ class OutageRow(Row):
 
     name = "Outage"
 
-    def _parse_uncommon_info(self, as_info: str, extended_children: list, *args):
+    def _parse_uncommon_info(self, as_info: str, extended_children: list):
         """Parses misc outage row info."""
 
         self._data["outage_as_name"], self._data["outage_as_number"] =\
@@ -22,4 +20,3 @@ class OutageRow(Row):
         prefix_info = self._nums_regex.findall(prefix_string)
         self._data["outage_number_prefixes_affected"] = prefix_info[0].strip()
         self._data["outage_percent_prefixes_affected"] = prefix_info[1].strip()
-        logging.debug("Parsed Outage")

@@ -1,72 +1,54 @@
-from copy import deepcopy
 import csv
-import logging
-from typing import List
+from datetime import date
+from pathlib import Path
+from typing import Optional
 
 import bs4
-from ipaddress import ip_network
+import requests_cache
 from tqdm import tqdm
-
-from lib_roa_checker import ROAChecker
-from lib_roa_collector import ROACollector
-from lib_utils import file_funcs, helper_funcs, base_classes
 
 from .front_page_info import FrontPageInfo
 from .row import Row
+from .utils import get_tags
 
 
-class BGPStreamWebsiteCollector(base_classes.Base):
+class BGPStreamWebsiteCollector:
     """This class parses bgpstream.com information"""
 
-    url = "https://bgpstream.com"
+    URL = "https://bgpstream.com"
 
-    def run(self):
-        """Inserts info from bgpstream.com into a tsv"""
+    def __init__(
+        self,
+        csv_path: Path = Path.home() / "Desktop" / "bgpstream_website.csv",
+        requests_cache_db_path: Optional[Path] = None,
+    ) -> None:
+        self.csv_path: Path = csv_path
 
-        roa_checker = self._get_roa_checker()
-        tsv_rows = []
+        # By default keep requests cached for a single day
+        if requests_cache_db_path is None:
+            requests_cache_db_path = Path("/tmp/") / f"{date.today()}.db"
+        self.requests_cache_db_path: Path = requests_cache_db_path
+        self.session = requests_cache.CachedSession(str(self.requests_cache_db_path))
+
+    def __del__(self):
+        self.session.close()
+
+    def run(self) -> None:
+        """Inserts info from bgpstream.com into a csv"""
+
+        csv_rows = []
         # Parses rows if they are the event types desired
-        rows: List[Row] = self._get_rows()
+        rows: list[Row] = self._get_rows()
         for row in tqdm(rows, desc="Parsing BGPStream.com", total=len(rows)):
-            # Parses the row into tsv format. Can't do with mp, rate limited
-            tsv_rows.append(row.parse(roa_checker))
-        file_funcs.write_dicts_to_tsv(tsv_rows, self.tsv_path, cols=Row.columns)
-        logging.debug("Wrote TSV")
-        if len(tsv_rows) == 0:
-            print(f"No bgpstream.com events for {self.dl_time}")
+            # Parses the row into csv format. Can't do with mp, rate limited
+            csv_rows.append(row.parse())
+        self._write_csv(csv_rows)
 
-    def _get_roa_checker(self):
-        """ROA checker.
-
-        We can get the roa based on the prefix, so we do this in advance
-        Afterwards we want fast lookups based on just the origin
-        so we construct a dict for this
-        """
-
-        kwargs = deepcopy(self.kwargs)
-        kwargs["dir_"] = self.dir_ / ROACollector.__name__
-        roa_collector = ROACollector(**kwargs)
-        roa_collector.run()
-
-        roa_checker = ROAChecker()
-        with open(roa_collector.tsv_path, mode="r") as f:
-            reader = csv.DictReader(f, delimiter="\t")
-            for row in reader:
-                origin = int(row["asn"])
-                try:
-                    max_length = int(row["max_length"])
-                # Sometimes max length is nan
-                except ValueError:
-                    max_length = None
-                roa_checker.insert(ip_network(row["prefix"]), origin, max_length)
-        return roa_checker
-
-
-    def _get_rows(self) -> List[Row]:
+    def _get_rows(self) -> list[Row]:
         """Returns rows within row limit"""
 
         # Gets the rows to parse
-        rows: List[bs4.element.Tag] = helper_funcs.get_tags(self.url, "tr")
+        rows: list[bs4.element.Tag] = get_tags("tr", self.URL, self.session)
 
         row_instances = []
         # Remove last ten rows - html is messed up
@@ -77,7 +59,12 @@ class BGPStreamWebsiteCollector(base_classes.Base):
             # This appears to be a bug in their website
             except KeyError:
                 continue
-            if info.start_date <= self.dl_time.date() <= info.end_date:
-                row_instances.append(info.RowCls(row))
+            row_instances.append(info.RowCls(row))
 
         return row_instances
+
+    def _write_csv(self, rows: list[Row]) -> None:
+        with self.csv_path.open("w") as f:
+            writer = csv.DictWriter(f, fieldnames=Row.columns)
+            writer.writeheader()
+            writer.writerows(rows)

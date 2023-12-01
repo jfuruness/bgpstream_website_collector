@@ -27,6 +27,12 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3"
 ]
+dependencies = [
+    "beautifulsoup4==4.12.2",
+    "tqdm==4.66.1",
+    "requests-cache==1.1.1",
+]
+
 requires-python = ">=3.10"
 
 [project.urls]
@@ -34,6 +40,7 @@ homepage = "https://github.com/jfuruness/bgpstream_website_collector.git"
 
 [project.optional-dependencies]
 test = [
+    "types-requests==2.31.0.10",
     "black==23.7.0",
     "pre-commit==3.3.3",
     "types-requests==2.31.0",

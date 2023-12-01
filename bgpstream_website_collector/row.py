@@ -1,9 +1,9 @@
-import logging
 import re
 
 import bs4
+from requests_cache import CachedSession
 
-from lib_utils import helper_funcs
+from .utils import get_tags
 
 
 class Row:
@@ -43,8 +43,6 @@ class Row:
                "hijack_expected_origin_number",
                "hijack_expected_prefix",
                "hijack_more_specific_prefix",
-               "hijack_expected_roa_validity",
-               "hijack_detected_roa_validity",
                # Leak fields
                "leak_detected_by_bgpmon_peers",
                "leak_example_as_path",
@@ -55,7 +53,6 @@ class Row:
                "leaker_as_number",
                "leak_origin_as_name",
                "leak_origin_as_number",
-               "leak_roa_validity",
                # Outage fields
                "outage_as_name",
                "outage_as_number",
@@ -75,7 +72,7 @@ class Row:
     def __init__(self, row: bs4.element.Tag):
         self.el = row
 
-    def parse(self, roa_checker) -> dict:
+    def parse(self, session: CachedSession) -> dict:
         """Parses, formats, and appends a row of data from bgpstream.com.
 
         For a more in depth explanation see the top of the file."""
@@ -85,11 +82,11 @@ class Row:
         # Gets the common elements and stores them in temp_row
         # Gets the html of the page for that specific event
         try:
-            as_info, extended_children = self._parse_common_elements()
+            as_info, extended_children = self._parse_common_elements(session)
             # Parses uncommon elements and stores them in temp_row
-            self._parse_uncommon_info(as_info, extended_children, roa_checker)
+            self._parse_uncommon_info(as_info, extended_children)
         except AttributeError:
-            logging.warning('ERROR IN THIS ROW. WILL NOT BE APPENDED')
+            print('ERROR IN THIS ROW. WILL NOT BE APPENDED')
 
         return self.tsv_formatted_data()
 
@@ -103,7 +100,7 @@ class Row:
 # Helper Functions #
 ####################
 
-    def _parse_common_elements(self):
+    def _parse_common_elements(self, session: CachedSession):
         """Parses common tags and adds data to temp_row.
 
         All common elements on the initial page are parsed, then the
@@ -132,8 +129,9 @@ class Row:
         self._data["event_number"] = self._nums_regex.search(
             self._data["url"]).group()
         url = 'https://bgpstream.com' + self._data["url"]
+
         # Returns the as info and html for the page with more info
-        return as_info, helper_funcs.get_tags(url, "td")
+        return as_info, get_tags("td", url, session)
 
     def _parse_as_info(self, as_info: str):
         """Performs regex on as_info to return AS number and AS name.
