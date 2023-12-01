@@ -1,17 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"""This file contains tests for the data_classes.py file.
-For specifics on each test, see the docstrings under each function.
-"""
-
-__authors__ = ["Justin Furuness, Tony Zheng"]
-__credits__ = ["Justin Furuness, Tony Zheng"]
-__Lisence__ = "BSD"
-__maintainer__ = "Justin Furuness"
-__email__ = "jfuruness@gmail.com"
-__status__ = "Development"
-
 import pytest
 from unittest.mock import patch
 from bs4 import BeautifulSoup as Soup
@@ -20,8 +6,6 @@ from ..tables import Hijacks_Table, Leaks_Table, Outages_Table
 from ..event_types import BGPStream_Website_Event_Types
 from itertools import combinations
 from .create_HTML import HTML_Creator
-# Importing actually runs the tests
-#from .test_tables import Test_Hijacks_Table, Test_Leaks_Table, Test_Outages_Table
 
 
 class Test_Data:
@@ -69,55 +53,19 @@ class Test_Data:
         """
         for event in setup.events:
             data = Test_Data.init(event)
-            with patch('lib_bgp_data.utils.utils.get_tags') as mock:
+            with patch('.utils.get_tags') as mock:
                 mock.side_effect = setup.open_custom_HTML
                 data.append(event['row'])
 
             # Columns are retrieved from the Postgres table columns
             # which has an 'id' column used as the primary key.
-            # Not part of row data, so must be removed 
+            # Not part of row data, so must be removed
             cols = data._columns
             cols.remove('id')
- 
+
             for i, c in enumerate(cols):
                 assert data.data[0][i] == event[c]
 
-    def test_db_insert(self, setup):
-        """Tests the db_insert function
-
-        Should have input with the powerset of all the combinations of:
-            -hijack, leak, outage
-            -country info vs non country info
-        And check expected output.
-        """
-        for event in setup.events:
-            data = Test_Data.init(event)
-            # need something to insert
-            with patch('lib_bgp_data.utils.utils.get_tags') as mock:               
-                mock.side_effect = setup.open_custom_HTML                
-                data.append(event['row']) 
-
-            with data.table() as t:
-                for IPV4, IPV6 in combinations([True, False], 2):
-                    data.db_insert(IPV4, IPV6)
-                    
-                    # db_insert creates indexes
-                    sql = f"""SELECT * FROM pg_indexes
-                              WHERE indexname = '{t.name}_index'"""
-                    assert len(t.execute(sql)) == 1
-
-                    # db_insert deletes duplicates
-                    sql = f"SELECT DISTINCT * FROM {t.name}"
-                    assert t.get_all() == t.execute(sql) 
-
-                    # check IPV filtering was successful
-                    for IPV, num in zip([IPV4, IPV6], [4, 6]):
-                        if not IPV and event['event_type'] != BGPStream_Website_Event_Types.OUTAGE.value:
-                            sql = f"""SELECT COUNT({t.prefix_column})
-                                      FROM {t.name}
-                                      WHERE family({t.prefix_column}) = {num}"""
-                            assert t.get_count(sql) == 0
- 
     def test_parse_common_elements(self, setup):
         """Tests the parse_common_elements function
 
@@ -128,10 +76,10 @@ class Test_Data:
         """
         for event in setup.events:
             data = Test_Data.init(event)
-            with patch('lib_bgp_data.utils.utils.get_tags') as mock:
+            with patch('.utils.get_tags') as mock:
                 mock.side_effect = setup.open_custom_HTML
                 as_info, extended_children = data._parse_common_elements(event['row'])
-               
+
                 assert event['as_info'] == as_info
                 assert event['extended_children'] == extended_children
 
@@ -148,7 +96,7 @@ class Test_Data:
             d = Test_Data.init(event)
 
             as_info = event['as_info']
-                
+
             # the AS info for outages will be a a single string
             if isinstance(as_info, str):
                 assert event['parsed_as_info1'] == d._parse_as_info(as_info)
@@ -196,5 +144,3 @@ class Test_Data:
             data._parse_uncommon_info(event['as_info'], event['extended_children'])
             for info in Test_Data.uncommon_info(event):
                 assert data._temp_row[info] == event[info]
-
-

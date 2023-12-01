@@ -1,14 +1,15 @@
 import csv
 from datetime import date
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import bs4
+from requests.adapters import HTTPAdapter, Retry
 import requests_cache
 from tqdm import tqdm
 
 from .front_page_info import FrontPageInfo
-from .row import Row
+from .rows import Row
 from .utils import get_tags
 
 
@@ -30,10 +31,15 @@ class BGPStreamWebsiteCollector:
         self.requests_cache_db_path: Path = requests_cache_db_path
         self.session = requests_cache.CachedSession(str(self.requests_cache_db_path))
 
+        # https://stackoverflow.com/a/35636367
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
+        self.session.mount('http://', HTTPAdapter(max_retries=retries))
+        self.session.mount('https://', HTTPAdapter(max_retries=retries))
+
     def __del__(self):
         self.session.close()
 
-    def run(self) -> None:
+    def run(self) -> list[dict[str, Any]]:
         """Inserts info from bgpstream.com into a csv"""
 
         csv_rows = []
@@ -43,6 +49,7 @@ class BGPStreamWebsiteCollector:
             # Parses the row into csv format. Can't do with mp, rate limited
             csv_rows.append(row.parse(self.session))
         self._write_csv(csv_rows)
+        return csv_rows
 
     def _get_rows(self) -> list[Row]:
         """Returns rows within row limit"""

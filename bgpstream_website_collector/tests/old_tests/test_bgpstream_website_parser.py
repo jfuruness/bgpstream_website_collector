@@ -1,17 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"""This file contains tests for the bgpstream_website_parser.py file.
-For specifics on each test, see docstrings under each function.
-"""
-
-__authors__ = ["Justin Furuness", "Tony Zheng"]
-__credits__ = ["Justin Furuness", "Tony Zheng"]
-__Lisence__ = "BSD"
-__maintainer__ = "Justin Furuness"
-__email__ = "jfuruness@gmail.com"
-__status__ = "Development"
-
 import pytest
 from unittest.mock import Mock, patch
 from itertools import chain, combinations
@@ -19,8 +5,7 @@ from ..bgpstream_website_parser import utils, BGPStream_Website_Parser
 from ..tables import Hijacks_Table, Leaks_Table, Outages_Table
 from ..data_classes import Hijack, Leak, Outage
 from ..event_types import BGPStream_Website_Event_Types
-from ....utils import utils
-from ....utils.database import Database, Generic_Table
+from ..utils import utils
 from bs4 import BeautifulSoup as Soup
 from time import strftime, gmtime, time
 import re
@@ -114,7 +99,7 @@ class Test_BGPStream_Website_Parser:
                         assert t.get_count() == 0
 
                     print(t.get_count())
-            
+
     @pytest.mark.parametrize('row_limit', [None, 5, 999999])
     @pytest.mark.parametrize('custom', [True, False])
     def test_get_rows(self, parser, row_limit, custom, setup):

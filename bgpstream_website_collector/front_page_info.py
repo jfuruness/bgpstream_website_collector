@@ -3,7 +3,7 @@ from datetime import datetime, date, timedelta
 
 import bs4
 
-from .row import Row
+from .rows import Row
 
 
 @dataclass(init=False)

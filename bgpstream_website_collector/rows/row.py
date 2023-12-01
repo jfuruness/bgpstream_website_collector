@@ -3,7 +3,7 @@ import re
 import bs4
 from requests_cache import CachedSession
 
-from .utils import get_tags
+from ..utils import get_tags
 
 
 class Row:
