@@ -15,7 +15,7 @@ class TestBGPStreamWebsiteCollector:
         """
 
         csv_path = tmp_path / "bgpstream.csv"
-        request_cache_db_path = tmp_path / "requests_cache.db"
+        requests_cache_db_path = tmp_path / "requests_cache.db"
 
         def mock_get_rows(*args, **kwargs):
             original_function = BGPStreamWebsiteCollector._get_rows
@@ -33,7 +33,7 @@ class TestBGPStreamWebsiteCollector:
             new=mock_get_rows,
         ):
             parser = BGPStreamWebsiteCollector(
-                csv_path=csv_path, request_cache_db_path=request_cache_db_path
+                csv_path=csv_path, requests_cache_db_path=requests_cache_db_path
             )
             rows = parser.run()
             assert len(rows) == 3

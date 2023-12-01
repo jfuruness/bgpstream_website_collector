@@ -8,7 +8,8 @@ from requests.adapters import HTTPAdapter, Retry
 import requests_cache
 from tqdm import tqdm
 
-from .front_page_info import FrontPageInfo
+# Since this is type ignored, mypy doesn't see the import
+from .front_page_info import FrontPageInfo  # type: ignore
 from .rows import Row
 from .utils import get_tags
 
@@ -70,7 +71,7 @@ class BGPStreamWebsiteCollector:
 
         return row_instances
 
-    def _write_csv(self, rows: list[Row]) -> None:
+    def _write_csv(self, rows: list[dict[str, Any]]) -> None:
         with self.csv_path.open("w") as f:
             writer = csv.DictWriter(f, fieldnames=Row.columns)
             writer.writeheader()

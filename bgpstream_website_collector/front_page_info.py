@@ -1,3 +1,7 @@
+# type: ignore
+
+# mypy doesn't understand any of these types even with asserts
+
 from dataclasses import dataclass
 from datetime import datetime, date, timedelta
 
@@ -15,7 +19,6 @@ class FrontPageInfo:
     end_date: date
     url: str
     event_num: int
-    end: str
     RowCls: Row
 
     def __init__(self, row: bs4.element.Tag) -> None:

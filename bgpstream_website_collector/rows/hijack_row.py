@@ -1,3 +1,9 @@
+# type: ignore
+
+from typing import Any
+
+import bs4
+
 from .row import Row
 
 
@@ -11,7 +17,6 @@ class HijackRow(Row):
         as_info: Any,
         extended_children: list[bs4.element.Tag],
     ) -> None:
-
         """Parses misc hijack row info."""
 
         (

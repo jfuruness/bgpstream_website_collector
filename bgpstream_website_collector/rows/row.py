@@ -107,8 +107,7 @@ class Row(ABC):
     ####################
 
     def _parse_common_elements(
-        self,
-        session: CachedSession
+        self, session: CachedSession
     ) -> tuple[Any, list[bs4.element.Tag]]:
         """Parses common tags and adds data to temp_row.
 
@@ -121,27 +120,33 @@ class Row(ABC):
         """
 
         children = [x for x in self.el.children]
-        self._data = {"event_type": children[1].string.strip()}
+        # Even with assertions, mypy doesn't get that these are navigable strings
+        self._data = {"event_type": children[1].string.strip()}  # type: ignore
         # Must use stripped strings here because the text contains an image
-        self._data["country"] = " ".join(children[3].stripped_strings)
+        self._data["country"] = " ".join(children[3].stripped_strings)  # type: ignore
         try:
             # If there is just one string this will work
-            as_info = children[5].string.strip()
+            as_info = children[5].string.strip()  # type: ignore
         except AttributeError:
             # If there is more than one AS this will work
-            stripped = children[5].stripped_strings
+            stripped = children[5].stripped_strings  # type: ignore
             as_info = [x for x in stripped]
         # Gets common elements
-        self._data["start_time"] = children[7].string.strip()
-        self._data["end_time"] = children[9].string.strip()
-        self._data["url"] = children[11].a["href"]
-        self._data["event_number"] = self._nums_regex.search(self._data["url"]).group()
+        self._data["start_time"] = children[7].string.strip()  # type: ignore
+        self._data["end_time"] = children[9].string.strip()  # type: ignore
+        self._data["url"] = children[11].a["href"]  # type: ignore
+        item = self._nums_regex.search(self._data["url"])
+        assert item, "mypy"
+        self._data["event_number"] = item.group()
         url = "https://bgpstream.com" + self._data["url"]
 
         # Returns the as info and html for the page with more info
         return as_info, get_tags("td", url, session)
 
-    def _parse_as_info(self, as_info: Any) -> tuple[Optional[str], Optional[str]]:
+    # mypy doesn't see that this has a return statement
+    def _parse_as_info(  # type: ignore
+        self, as_info: Any
+    ) -> tuple[Optional[str], Optional[str]]:
         """Performs regex on as_info to return AS number and AS name.
 
         This is a mess, but that's because parsing html is a mess.

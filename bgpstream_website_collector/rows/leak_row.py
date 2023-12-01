@@ -1,3 +1,12 @@
+# type: ignore
+
+# even with asserts, mypy doesn't understand these types
+
+
+from typing import Any
+
+import bs4
+
 from .row import Row
 
 
