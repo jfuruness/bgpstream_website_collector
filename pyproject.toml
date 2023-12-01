@@ -61,9 +61,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 include-package-data = true
-packages = ["find:", "exclude:tests"]
 
-[tool.setuptools.entry-points.console-scripts]
+[project.scripts]
 bgpstream_website_collector = "bgpstream_website_collector.__main__:main"
 
 [tool.pytest.ini_options]

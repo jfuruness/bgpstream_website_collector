@@ -41,7 +41,7 @@ class BGPStreamWebsiteCollector:
         rows: list[Row] = self._get_rows()
         for row in tqdm(rows, desc="Parsing BGPStream.com", total=len(rows)):
             # Parses the row into csv format. Can't do with mp, rate limited
-            csv_rows.append(row.parse())
+            csv_rows.append(row.parse(self.session))
         self._write_csv(csv_rows)
 
     def _get_rows(self) -> list[Row]:
