@@ -1,4 +1,6 @@
+from abc import ABC, abstractmethod
 import re
+from typing import Any, Optional
 
 import bs4
 from requests_cache import CachedSession
@@ -6,7 +8,7 @@ from requests_cache import CachedSession
 from ..utils import get_tags
 
 
-class Row:
+class Row(ABC):
     """Parent Class for parsing rows of bgpstream.com"""
 
     # This regex parses out the AS number and name from a string of both
@@ -62,8 +64,7 @@ class Row:
         "outage_number_prefixes_affected",
         "outage_percent_prefixes_affected",
     )
-
-    name_to_type = dict()
+    name_to_type: dict[str, type["Row"]] = dict()
 
     def __init_subclass__(cls, *args, **kwargs):
         """This method essentially creates a list of all subclasses
@@ -71,18 +72,19 @@ class Row:
         """
 
         super().__init_subclass__(*args, **kwargs)
-        cls.name_to_type[cls.name] = cls
+        # mypy just doesn't get this
+        cls.name_to_type[cls.name] = cls  # type: ignore
 
     def __init__(self, row: bs4.element.Tag):
         self.el = row
 
-    def parse(self, session: CachedSession) -> dict:
+    def parse(self, session: CachedSession) -> dict[str, Any]:
         """Parses, formats, and appends a row of data from bgpstream.com.
 
         For a more in depth explanation see the top of the file."""
 
         # Initializes the temporary row
-        self._data = dict()
+        self._data: dict[str, Any] = dict()
         # Gets the common elements and stores them in temp_row
         # Gets the html of the page for that specific event
         try:
@@ -94,7 +96,7 @@ class Row:
 
         return self.tsv_formatted_data()
 
-    def tsv_formatted_data(self) -> dict:
+    def tsv_formatted_data(self) -> dict[str, Any]:
         for k, v in self._data.items():
             assert k in self.columns, k
 
@@ -104,7 +106,10 @@ class Row:
     # Helper Functions #
     ####################
 
-    def _parse_common_elements(self, session: CachedSession):
+    def _parse_common_elements(
+        self,
+        session: CachedSession
+    ) -> tuple[Any, list[bs4.element.Tag]]:
         """Parses common tags and adds data to temp_row.
 
         All common elements on the initial page are parsed, then the
@@ -136,12 +141,13 @@ class Row:
         # Returns the as info and html for the page with more info
         return as_info, get_tags("td", url, session)
 
-    def _parse_as_info(self, as_info: str):
+    def _parse_as_info(self, as_info: Any) -> tuple[Optional[str], Optional[str]]:
         """Performs regex on as_info to return AS number and AS name.
 
         This is a mess, but that's because parsing html is a mess.
         """
 
+        assert isinstance(as_info, str)
         as_parsed = self._as_regex.search(as_info)
 
         # If the as_info is "N/A" and the regex returns nothing
@@ -159,3 +165,16 @@ class Row:
             # This is the second way the string can be formatted:
             elif as_parsed.group("as_number2") not in [None, "", " "]:
                 return as_parsed.group("as_name2"), as_parsed.group("as_number2")
+
+    @abstractmethod
+    def _parse_uncommon_info(
+        self,
+        as_info: Any,
+        extended_children: list[bs4.element.Tag],
+    ) -> None:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        raise NotImplementedError

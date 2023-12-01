@@ -4,13 +4,14 @@ from .row import Row
 class HijackRow(Row):
     """Class for parsing Hijack events. Inherits from Row."""
 
-    name = "Possible Hijack"
+    name: str = "Possible Hijack"
 
     def _parse_uncommon_info(
         self,
-        as_info: str,
-        extended_children: list,
-    ):
+        as_info: Any,
+        extended_children: list[bs4.element.Tag],
+    ) -> None:
+
         """Parses misc hijack row info."""
 
         (

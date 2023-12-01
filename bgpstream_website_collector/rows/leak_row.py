@@ -4,9 +4,13 @@ from .row import Row
 class LeakRow(Row):
     """Class for parsing Leak events. Inherits from Row."""
 
-    name = "BGP Leak"
+    name: str = "BGP Leak"
 
-    def _parse_uncommon_info(self, as_info: str, extended_children: list):
+    def _parse_uncommon_info(
+        self,
+        as_info: Any,
+        extended_children: list[bs4.element.Tag],
+    ) -> None:
         """Parses misc leak row info."""
 
         (

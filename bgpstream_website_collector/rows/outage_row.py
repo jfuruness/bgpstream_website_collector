@@ -4,9 +4,13 @@ from .row import Row
 class OutageRow(Row):
     """Class for parsing outage events"""
 
-    name = "Outage"
+    name: str = "Outage"
 
-    def _parse_uncommon_info(self, as_info: str, extended_children: list):
+    def _parse_uncommon_info(
+        self,
+        as_info: Any,
+        extended_children: list[bs4.element.Tag],
+    ) -> None:
         """Parses misc outage row info."""
 
         (
