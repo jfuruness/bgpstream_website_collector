@@ -1,4 +1,3 @@
-from copy import deepcopy
 import csv
 from pathlib import Path
 from unittest.mock import patch
@@ -18,8 +17,8 @@ class TestBGPStreamWebsiteCollector:
         csv_path = tmp_path / "bgpstream.csv"
         requests_cache_db_path = tmp_path / "requests_cache.db"
 
-
         original_get_rows = BGPStreamWebsiteCollector._get_rows
+
         def mock_get_rows(*args, **kwargs):
             original_function = original_get_rows
             full_list = original_function(*args, **kwargs)
