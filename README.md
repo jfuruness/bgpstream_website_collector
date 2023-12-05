@@ -31,13 +31,15 @@ from a script:
 
 ```python
 from pathlib import Path
+from typing import Any
 
 from bgpstream_website_collector import BGPStreamWebsiteCollector
 
 
 def main():
+    # Leave csv_path as None to not write CSV
     csv_path: Path = Path.home() / "Desktop" / "bgpstream_website.csv"
-    BGPStreamWebsiteCollector(csv_path=csv_path).run()
+    rows: dict[str, Any] = BGPStreamWebsiteCollector(csv_path=csv_path).run()
 
 
 if __name__ == "__main__":
@@ -109,7 +111,8 @@ Huge contributions to original version in lib_bgp_data to the testing from Tony 
 ## History
 * [bgpstream\_website\_collector](#bgpstream\_website\_collector)
 
-TODO
+1.1.0 Added option to pass None to csv_path
+1.0.0 First major release
 
 ## Development/Contributing
 * [bgpstream\_website\_collector](#bgpstream\_website\_collector)

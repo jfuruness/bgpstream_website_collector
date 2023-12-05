@@ -21,10 +21,10 @@ class BGPStreamWebsiteCollector:
 
     def __init__(
         self,
-        csv_path: Path = Path.home() / "Desktop" / "bgpstream_website.csv",
+        csv_path: Optional[Path] = Path.home() / "Desktop" / "bgpstream_website.csv",
         requests_cache_db_path: Optional[Path] = None,
     ) -> None:
-        self.csv_path: Path = csv_path
+        self.csv_path: Optional[Path] = csv_path
 
         # By default keep requests cached for a single day
         if requests_cache_db_path is None:
@@ -72,7 +72,8 @@ class BGPStreamWebsiteCollector:
         return row_instances
 
     def _write_csv(self, rows: list[dict[str, Any]]) -> None:
-        with self.csv_path.open("w") as f:
-            writer = csv.DictWriter(f, fieldnames=Row.columns)
-            writer.writeheader()
-            writer.writerows(rows)
+        if self.csv_path:
+            with self.csv_path.open("w") as f:
+                writer = csv.DictWriter(f, fieldnames=Row.columns)
+                writer.writeheader()
+                writer.writerows(rows)
