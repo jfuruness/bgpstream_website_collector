@@ -39,7 +39,7 @@ from bgpstream_website_collector import BGPStreamWebsiteCollector
 def main():
     # Leave csv_path as None to not write CSV
     csv_path: Path = Path.home() / "Desktop" / "bgpstream_website.csv"
-    rows: dict[str, Any] = BGPStreamWebsiteCollector(csv_path=csv_path).run()
+    rows: list[dict[str, Any]] = BGPStreamWebsiteCollector(csv_path=csv_path).run()
 
 
 if __name__ == "__main__":
