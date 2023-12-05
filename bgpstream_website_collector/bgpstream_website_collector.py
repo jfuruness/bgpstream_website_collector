@@ -40,19 +40,19 @@ class BGPStreamWebsiteCollector:
     def __del__(self):
         self.session.close()
 
-    def run(self) -> list[dict[str, Any]]:
+    def run(self, event_date: Optional[date] = None) -> list[dict[str, Any]]:
         """Inserts info from bgpstream.com into a csv"""
 
         csv_rows = []
         # Parses rows if they are the event types desired
-        rows: list[Row] = self._get_rows()
+        rows: list[Row] = self._get_rows(event_date)
         for row in tqdm(rows, desc="Parsing BGPStream.com", total=len(rows)):
             # Parses the row into csv format. Can't do with mp, rate limited
             csv_rows.append(row.parse(self.session))
         self._write_csv(csv_rows)
         return csv_rows
 
-    def _get_rows(self) -> list[Row]:
+    def _get_rows(self, event_date: Optional[date]) -> list[Row]:
         """Returns rows within row limit"""
 
         # Gets the rows to parse
@@ -63,6 +63,9 @@ class BGPStreamWebsiteCollector:
         for row in rows[: len(rows) - 10]:
             try:
                 info = FrontPageInfo(row)
+                # Useful if we only want to overlap with a specific day
+                if not event_date or (info.start_date <= event_date <= info.end_date):
+                    continue
             # We don't support Unclassified events
             # This appears to be a bug in their website
             except KeyError:

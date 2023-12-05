@@ -111,6 +111,7 @@ Huge contributions to original version in lib_bgp_data to the testing from Tony 
 ## History
 * [bgpstream\_website\_collector](#bgpstream\_website\_collector)
 
+1.1.1 Fixed start_time -> start_date type
 1.1.0 Added option to pass None to csv_path
 1.0.0 First major release
 
