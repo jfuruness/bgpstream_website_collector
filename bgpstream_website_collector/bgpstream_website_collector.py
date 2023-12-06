@@ -64,7 +64,9 @@ class BGPStreamWebsiteCollector:
             try:
                 info = FrontPageInfo(row)
                 # Useful if we only want to overlap with a specific day
-                if not event_date or (info.start_date <= event_date <= info.end_date):
+                if event_date is not None and (
+                    info.start_date <= event_date <= info.end_date
+                ):
                     continue
             # We don't support Unclassified events
             # This appears to be a bug in their website

@@ -1,6 +1,6 @@
 [project]
 name = "bgpstream_website_collector"
-version = "1.1.0"
+version = "1.1.2"
 description = "Downloads BGPStream info solely for research purposes"
 readme = "README.md"
 authors = [
